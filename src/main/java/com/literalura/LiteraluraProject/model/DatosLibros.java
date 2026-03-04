@@ -1,12 +1,14 @@
 package com.literalura.LiteraluraProject.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 
-public record DatosLibro(
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record Libro(
         @JsonAlias("title") String titulo,
-        @JsonAlias("authors") List<DatosAutor> autor,
+        @JsonAlias("authors") List<Autor> autor,
         @JsonAlias("languages") List<String> idiomas,
         @JsonAlias("download_count") Double numeroDescargas
 ) {
