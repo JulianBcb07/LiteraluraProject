@@ -14,7 +14,7 @@ public class Libro {
     private String idioma;
     private Double numeroDescargas;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "autor_id")
     private Autor autor;
 

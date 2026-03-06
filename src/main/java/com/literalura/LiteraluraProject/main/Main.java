@@ -1,9 +1,15 @@
 package com.literalura.LiteraluraProject.main;
 
+import com.literalura.LiteraluraProject.model.Autor;
+import com.literalura.LiteraluraProject.model.Datos;
+import com.literalura.LiteraluraProject.model.DatosLibros;
+import com.literalura.LiteraluraProject.model.Libro;
+import com.literalura.LiteraluraProject.repository.AutorRepository;
 import com.literalura.LiteraluraProject.repository.LibroRepository;
 import com.literalura.LiteraluraProject.service.APIConexion;
 import com.literalura.LiteraluraProject.service.ConvierteDatos;
 
+import java.util.Optional;
 import java.util.Scanner;
 
 public class Main {
@@ -13,9 +19,11 @@ public class Main {
     private final String URL_BASE = "https://gutendex.com/books/";
     private ConvierteDatos conversor = new ConvierteDatos();
     private LibroRepository libroRepository;
+    private AutorRepository autorRepository;
 
-    public Main(LibroRepository libroRepository) {
+    public Main(LibroRepository libroRepository, AutorRepository autorRepository) {
         this.libroRepository = libroRepository;
+        this.autorRepository = autorRepository;
     }
 
     public void muestraElMenu() {
@@ -63,7 +71,47 @@ public class Main {
     }
 
     private void buscarLibroPorTitulo() {
+        System.out.println("Ingrese el titulo del libro que desea buscar:");
+        var nombreLibro = sc.nextLine();
+        var json = APIConexion.obetenerDatos(URL_BASE + "?search=" + nombreLibro.replace(" ", "%20"));
+        var datosBusqueda = conversor.obtenerDatos(json, Datos.class);
 
+        Optional<DatosLibros> libroBuscado = datosBusqueda.Libros().stream()
+                .filter(l -> l.titulo().toUpperCase().contains(nombreLibro.toUpperCase()))
+                .findFirst();
+
+        if (libroBuscado.isPresent()) {
+            System.out.println("Libro Encontrado: " + libroBuscado.get());
+
+            Optional<Libro> libroExistente = libroRepository.findByTituloIgnoreCase(libroBuscado.get().titulo());
+
+            if (libroExistente.isPresent()) {
+                System.out.println("\n-------------------------------------------");
+                System.out.println("¡AVISO: El libro '" + libroExistente.get().getTitulo() + "' ya está registrado!");
+                System.out.println("-------------------------------------------\n");
+            } else {
+
+                DatosLibros datosLibro = libroBuscado.get();
+                Libro libro = new Libro(datosLibro);
+
+                var datosAutor = datosLibro.autor().get(0);
+
+                Autor autor = autorRepository.findByNombreIgnoreCase(datosAutor.nombre())
+                        .orElseGet(() -> {
+                            Autor nuevoAutor = new Autor(datosAutor);
+                            return autorRepository.save(nuevoAutor);
+                        });
+
+                libro.setAutor(autor);
+                libroRepository.save(libro);
+
+                System.out.println("-------------------------------------------");
+                System.out.println("Libro y Autor registrados con éxito");
+                System.out.println("-------------------------------------------");
+            }
+        } else {
+            System.out.println("Libro no encontrado en la API.");
+        }
     }
 
     private void listarLibrosRegistrados() {
