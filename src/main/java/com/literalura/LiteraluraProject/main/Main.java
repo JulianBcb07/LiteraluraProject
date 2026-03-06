@@ -63,6 +63,7 @@ public class Main {
                         break;
                     case 5:
                         listarLibrosPorIdioma();
+                        break;
                     case 0:
                         System.out.println("Cerrando la aplicación...");
                         break;
@@ -165,11 +166,59 @@ public class Main {
     }
 
     private void listarAutoresVivosYear() {
+        System.out.println("Ingrese el año que desea consultar:");
+        var year = sc.nextLine();
 
+        List<Autor> autoresVivos = autorRepository.buscarAutoresvivos(year);
+
+        if (autoresVivos.isEmpty()) {
+            System.out.println("No se encontraron autores vivos registrados en el año " + year);
+        } else {
+            System.out.println("\n--- Autores vivos en el año " + year + " ---");
+            autoresVivos.forEach(a -> {
+                System.out.printf("""
+                    Autor: %s
+                    Nacimiento: %s
+                    Fallecimiento: %s
+                    ---------------------------
+                    """,
+                        a.getNombre(),
+                        a.getFechaNacimiento(),
+                        a.getFechaFallecimiento() != null ? a.getFechaFallecimiento() : "Sigue vivo o sin registro"
+                );
+            });
+        }
     }
 
     private void listarLibrosPorIdioma() {
+        System.out.println("""
+            Ingrese el idioma para buscar los libros:
+            es - Español
+            en - Inglés
+            fr - Francés
+            pt - Portugués
+            """);
+        var idiomaElegido = sc.nextLine();
 
+        List<Libro> librosPorIdioma = libroRepository.findByIdioma(idiomaElegido);
+
+        if (librosPorIdioma.isEmpty()) {
+            System.out.println("No se encontraron libros en el idioma: " + idiomaElegido);
+        } else {
+            System.out.printf("\n--- Libros encontrados en (%s) ---\n", idiomaElegido);
+            librosPorIdioma.forEach(l -> {
+                System.out.printf("""
+                    Título: %s
+                    Autor:  %s
+                    Descargas: %.0f
+                    ---------------------------
+                    """,
+                        l.getTitulo(),
+                        l.getAutor().getNombre(),
+                        l.getNumeroDescargas()
+                );
+            });
+        }
     }
 
 }

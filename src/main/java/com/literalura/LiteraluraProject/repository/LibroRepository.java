@@ -16,4 +16,6 @@ public interface LibroRepository extends JpaRepository<Libro, Long> {
     @Query("SELECT l FROM Libro l")
     List<Libro> listarLibros();
 
+    List<Libro> findByIdioma(String idioma);
+
 }
