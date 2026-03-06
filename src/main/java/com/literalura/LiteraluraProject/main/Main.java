@@ -12,6 +12,7 @@ import com.literalura.LiteraluraProject.service.ConvierteDatos;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -138,6 +139,28 @@ public class Main {
     }
 
     private void listarAutoresRegistrados() {
+        List<Autor> listarAutores = autorRepository.findAll();
+
+        if(listarAutores.isEmpty()) {
+            System.out.println("No hay autores registrados en la base de datos");
+        } else {
+            listarAutores.forEach(a -> {
+
+                String tituloLibros = a.getLibros().stream().map(Libro::getTitulo).collect(Collectors.joining(", "));
+
+                    System.out.printf("""
+                            Autor: %s
+                            Fecha de nacimiento: %s
+                            Fecha de fallecimiento: %s
+                            Libros: [%s]
+                            %n""",
+                            a.getNombre(),
+                            a.getFechaNacimiento(),
+                            a.getFechaFallecimiento() != null ? a.getFechaFallecimiento() : "N/A",
+                            tituloLibros
+                            );
+            });
+        }
 
     }
 
