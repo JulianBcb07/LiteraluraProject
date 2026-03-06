@@ -9,6 +9,7 @@ import com.literalura.LiteraluraProject.repository.LibroRepository;
 import com.literalura.LiteraluraProject.service.APIConexion;
 import com.literalura.LiteraluraProject.service.ConvierteDatos;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -115,7 +116,25 @@ public class Main {
     }
 
     private void listarLibrosRegistrados() {
-
+        List<Libro> listarLibros = libroRepository.listarLibros();
+        if (listarLibros.isEmpty()) {
+            System.out.println("No hay libros registrados en la base de datos.");
+        } else {
+            listarLibros.forEach(l -> {
+                System.out.printf("""
+                    -------------- LIBRO -------------
+                    Título:    %s
+                    Autor:     %s
+                    Idioma:    %s
+                    Descargas: %.0f
+                    ----------------------------------
+                    %n""",
+                        l.getTitulo(),
+                        l.getAutor().getNombre(),
+                        l.getIdioma(),
+                        l.getNumeroDescargas());
+            });
+        }
     }
 
     private void listarAutoresRegistrados() {
